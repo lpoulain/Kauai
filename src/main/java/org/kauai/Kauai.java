@@ -17,14 +17,7 @@ import java.awt.GridBagLayout;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.kauai.KAction.Type.DESCRIBE;
-import static org.kauai.KAction.Type.LOGS;
-import static org.kauai.KAction.Type.SHELL;
-
-
 public class Kauai {
-//    enum Action { LOGS, SHELL, DESCRIBE };
-
     private KObjectTable pods;
     private JFrame frame;
     private JPanel p1;

@@ -1,7 +1,7 @@
 package org.kauai;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -10,7 +10,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
@@ -41,6 +40,9 @@ public class KObjectTable {
     private JLabel filterLabel;
     private TableRowSorter<TableModel> sorter;
     private GridLayout layout;
+    private JLabel message;
+    private JComponent listComponent;
+    private Thread loadingThread;
 
     JPanel getPanel() {
         return this.panel;
@@ -49,12 +51,9 @@ public class KObjectTable {
     KObjectTable(Kubectl k, String kobject, Kauai mainApp) throws Exception {
         this.k = k;
         panel = new JPanel();
-//        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Pods", TitledBorder.CENTER, TitledBorder.TOP));
         panel.setLayout(new BorderLayout());
         this.kobject = kobject;
-        this.items = k.get(kobject);
         this.mainApp = mainApp;
-        this.metadata = k.getMetadata(kobject);
 
         layout = new GridLayout(1, 4);
         layout.setHgap(10);
@@ -63,13 +62,13 @@ public class KObjectTable {
 //        topPanel.setLayout(new BorderLayout());
 
         JRadioButton radioService = new JRadioButton("Services");
-        radioService.addActionListener((e) -> changeType("service"));
+        radioService.addActionListener((e) -> setType("service"));
 
         JRadioButton radioDeployment = new JRadioButton("Deployments");
-        radioDeployment.addActionListener((e) -> changeType("deployment"));
+        radioDeployment.addActionListener((e) -> setType("deployment"));
 
         JRadioButton radioPods = new JRadioButton("Pods");
-        radioPods.addActionListener((e) -> changeType("pod"));
+        radioPods.addActionListener((e) -> setType("pod"));
         radioPods.setSelected(true);
 
         ButtonGroup group = new ButtonGroup();
@@ -88,30 +87,45 @@ public class KObjectTable {
         topPanel2.add(topPanel);
         panel.add(topPanel2, BorderLayout.NORTH);
 
-        createTable();
         panel.revalidate();
         panel.repaint();
+        setType(kobject);
     }
 
-    private void changeType(String kobject) {
-        this.kobject = kobject;
-        try {
-            this.items = k.get(kobject);
-        } catch (Exception e) {
-            System.out.println(e);
-            return;
+    private void setMessage(String textMessage) {
+        if (listComponent != null) {
+            panel.remove(listComponent);
         }
-        this.filter = "";
-        this.metadata = k.getMetadata(kobject);
+        message = new JLabel();
+        message.setText(textMessage);
+        panel.add(message, BorderLayout.CENTER);
+        listComponent = message;
+    }
 
-        scrollPane.remove(table);
-        panel.remove(scrollPane);
+    private void setType(String kobject) {
+        if (loadingThread != null) {
+            loadingThread.interrupt();
+        }
+        loadingThread = new Thread(() -> {
+            setMessage(String.format("Loading %ss...", kobject));
 
-        createTable();
-        panel.revalidate();
-        panel.repaint();
-        table.setRowSelectionInterval(0, 0);
-        table.grabFocus();
+            this.kobject = kobject;
+            try {
+                this.items = k.get(kobject);
+                this.filter = "";
+                this.metadata = k.getMetadata(kobject);
+
+                if (scrollPane != null) {
+                    scrollPane.remove(table);
+                }
+
+                createTable();
+            } catch (Exception e) {
+                message.setText("ERROR: " + e);
+            }
+        });
+        loadingThread.setName("Loading " + kobject);
+        loadingThread.start();
     }
 
     private void createTable() {
@@ -125,7 +139,7 @@ public class KObjectTable {
         TableModel model = new DefaultTableModel(data, labels) {
             public Class getColumnClass(int column) {
                 Class returnValue;
-                if((column >= 0) && (column < getColumnCount())) {
+                if ((column >= 0) && (column < getColumnCount())) {
                     returnValue = getValueAt(0, column).getClass();
                 } else {
                     returnValue = Object.class;
@@ -168,8 +182,14 @@ public class KObjectTable {
 
         table.setComponentPopupMenu(popupMenu);
         scrollPane = new JScrollPane(table);
+        if (listComponent != null) {
+            panel.remove(listComponent);
+        }
         panel.add(scrollPane, BorderLayout.CENTER);
+        listComponent = scrollPane;
         panel.setVisible(true);
+        panel.revalidate();
+        panel.repaint();
     }
 
     private void setTableFilter(String filter) {
