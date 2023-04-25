@@ -31,10 +31,12 @@ public class KCommandTerminal implements KCommand {
     ConsolePane panel;
     JFrame frame;
     String pod;
+    String namespace;
     Kauai mainApp;
 
     public KCommandTerminal(String pod, String namespace, Kauai mainApp) {
         this.pod = pod;
+        this.namespace = namespace;
         this.mainApp = mainApp;
 
         EventQueue.invokeLater(() -> {
@@ -59,13 +61,13 @@ public class KCommandTerminal implements KCommand {
         private JTextArea textArea;
         private int userInputStart = 0;
         private Command cmd;
-        private String pod;
+        private final String pod;
 
         public ConsolePane(String pod) {
             this.pod = pod;
 
             cmd = new Command(this);
-            cmd.runner = new ProcessRunner(cmd.listener, null, pod);
+            cmd.runner = new ProcessRunner(cmd.listener, null, pod, namespace);
             cmd.runner.setName("Shell for " + pod);
 
             setLayout(new BorderLayout());
@@ -204,7 +206,7 @@ public class KCommandTerminal implements KCommand {
                     }
                 }
 
-                runner = new ProcessRunner(listener, values, pod);
+                runner = new ProcessRunner(listener, values, pod, namespace);
             }
         }
 
@@ -217,11 +219,13 @@ public class KCommandTerminal implements KCommand {
         private final List<String> cmds;
         private final CommandListener listener;
         private final String pod;
+        private final String namespace;
 
         private Process process;
 
-        public ProcessRunner(CommandListener listener, List<String> cmds, String pod) {
+        public ProcessRunner(CommandListener listener, List<String> cmds, String pod, String namespace) {
             this.pod = pod;
+            this.namespace = namespace;
             this.cmds = cmds;
             this.listener = listener;
             start();
@@ -230,9 +234,10 @@ public class KCommandTerminal implements KCommand {
         @Override
         public void run() {
             try {
-                String[] commands = {"kubectl", "exec", "--stdin", pod, "--", "/bin/ash"};
+                String[] commands = {"kubectl", "exec", "--stdin", pod, "--", "/bin/ash", "--namespace=" + namespace};
                 ProcessBuilder pb = new ProcessBuilder(commands);
                 pb.redirectErrorStream();
+                System.out.println(String.join(" ", commands));
                 process = pb.start();
                 StreamReader reader = new StreamReader(listener, process.getInputStream());
                 StreamReader errorReader = new StreamReader(listener, process.getErrorStream());

@@ -56,7 +56,7 @@ public class KCommandReadOutput implements KCommand {
             }
             proc.destroy();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 

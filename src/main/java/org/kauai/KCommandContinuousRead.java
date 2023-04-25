@@ -51,7 +51,7 @@ public class KCommandContinuousRead implements KCommand {
                     System.out.println("ERROR: " + s);
                 }
             } catch (Exception e) {
-                System.out.println(e);
+                e.printStackTrace();
             }
         });
 

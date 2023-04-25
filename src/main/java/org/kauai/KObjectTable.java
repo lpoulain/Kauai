@@ -122,6 +122,7 @@ public class KObjectTable {
                 createTable();
             } catch (Exception e) {
                 message.setText("ERROR: " + e);
+                e.printStackTrace();
             }
         });
         loadingThread.setName("Loading " + kobject);

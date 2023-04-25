@@ -34,7 +34,7 @@ public class Kauai {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
         } catch (UnsupportedLookAndFeelException ex) {
-            System.out.println("Error");
+            ex.printStackTrace();
         }
 
         frame = new JFrame("frame");
