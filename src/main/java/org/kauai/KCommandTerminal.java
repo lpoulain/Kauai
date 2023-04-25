@@ -234,7 +234,7 @@ public class KCommandTerminal implements KCommand {
         @Override
         public void run() {
             try {
-                String[] commands = {"kubectl", "exec", "--stdin", pod, "--", "/bin/ash", "--namespace=" + namespace};
+                String[] commands = {"kubectl", "exec", "--namespace=" + namespace, "--stdin", pod, "--", "/bin/ash"};
                 ProcessBuilder pb = new ProcessBuilder(commands);
                 pb.redirectErrorStream();
                 System.out.println(String.join(" ", commands));

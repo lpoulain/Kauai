@@ -72,6 +72,7 @@ public class Kubectl {
             } else if (pathStep.equals("[keys]")) {
                 return String.join(", ", obj.keySet());
             } else {
+                if (obj.get(pathStep) == null) return "";
                 return obj.get(pathStep).toString();
             }
         }
