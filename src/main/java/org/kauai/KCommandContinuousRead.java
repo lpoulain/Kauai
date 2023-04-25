@@ -12,12 +12,14 @@ import java.io.PrintStream;
 public class KCommandContinuousRead implements KCommand {
     private Thread thread;
     private final String podName;
+    private final String namespace;
     private final Kauai mainApp;
     Process proc;
 
-    public KCommandContinuousRead(String podName, Kauai mainApp) {
+    public KCommandContinuousRead(String podName, String namespace, Kauai mainApp) {
         this.podName = podName;
         this.mainApp = mainApp;
+        this.namespace = namespace;
         createPanel();
     }
 
@@ -27,13 +29,14 @@ public class KCommandContinuousRead implements KCommand {
         this.thread = null;
     }
 
-    private void logs(String podName, PrintStream printStream) {
+    private void logs(String podName, String namespace, PrintStream printStream) {
         thread = new Thread(() -> {
             try {
-                String[] commands = {"kubectl", "logs", "--follow", podName};
+                String[] commands = {"kubectl", "logs", "--namespace=" + namespace, "--follow", podName};
                 ProcessBuilder pb = new ProcessBuilder(commands);
                 pb.redirectError(ProcessBuilder.Redirect.INHERIT);
                 pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
+                System.out.println(String.join(" ", commands));
                 proc = pb.start();
 
                 BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -63,11 +66,11 @@ public class KCommandContinuousRead implements KCommand {
         ta.setFont(font);
         TextAreaOutputStream taos = new TextAreaOutputStream(ta, 60);
         PrintStream ps = new PrintStream( taos );
-        logs(podName, ps);
+        logs(podName, namespace, ps);
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.add(new JScrollPane(ta));
         panel.setVisible(true);
-        mainApp.newPanel(panel, new KAction("pod", podName, KAction.Type.LOGS));
+        mainApp.newPanel(panel, new KAction("pod", podName, KAction.Type.LOGS, namespace));
     }
 }

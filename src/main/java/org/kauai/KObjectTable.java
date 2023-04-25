@@ -206,7 +206,7 @@ public class KObjectTable {
             return;
         }
         KObject item = items.get(index);
-        mainApp.createTab(new KAction(kobject, item.getName(), actionType));
+        mainApp.createTab(new KAction(kobject, item.getName(), actionType, item.geNamespace()));
     }
 
     class KObjectTableKeyAdapter extends KeyAdapter {
@@ -232,7 +232,7 @@ public class KObjectTable {
                 }
 
                 if (actionType != null && metadata.supportsAction(actionType)) {
-                    mainApp.createTab(new KAction(kobject, item.getName(), actionType));
+                    mainApp.createTab(new KAction(kobject, item.getName(), actionType, item.geNamespace()));
                 }
 
                 return;

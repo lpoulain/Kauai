@@ -33,14 +33,14 @@ public class KCommandTerminal implements KCommand {
     String pod;
     Kauai mainApp;
 
-    public KCommandTerminal(String pod, Kauai mainApp) {
+    public KCommandTerminal(String pod, String namespace, Kauai mainApp) {
         this.pod = pod;
         this.mainApp = mainApp;
 
         EventQueue.invokeLater(() -> {
             panel = new ConsolePane(pod);
             panel.setVisible(true);
-            mainApp.newPanel(panel, new KAction("pod", pod, SHELL));
+            mainApp.newPanel(panel, new KAction("pod", pod, SHELL, namespace));
         });
     }
 

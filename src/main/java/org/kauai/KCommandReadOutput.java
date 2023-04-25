@@ -37,6 +37,8 @@ public class KCommandReadOutput implements KCommand {
                     commands.add(action.getResourceName());
                 }
             }
+            commands.add("--namespace=" + action.getNamespace());
+            System.out.println(String.join(" ", commands));
             ProcessBuilder pb = new ProcessBuilder(commands);
             pb.redirectError(ProcessBuilder.Redirect.INHERIT);
             pb.redirectInput(ProcessBuilder.Redirect.INHERIT);

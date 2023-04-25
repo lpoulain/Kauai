@@ -75,8 +75,8 @@ public class Kauai {
         }
         KCommand cmd = null;
         switch (action.getType()) {
-            case SHELL -> cmd = new KCommandTerminal(action.getResourceName(), this);
-            case LOGS -> cmd = new KCommandContinuousRead(action.getResourceName(), this);
+            case SHELL -> cmd = new KCommandTerminal(action.getResourceName(), action.getNamespace(), this);
+            case LOGS -> cmd = new KCommandContinuousRead(action.getResourceName(), action.getNamespace(), this);
             case DESCRIBE -> cmd = new KCommandReadOutput(action, this);
         }
         kcommands.put(actionDesc, cmd);

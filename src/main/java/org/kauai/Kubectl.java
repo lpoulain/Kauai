@@ -92,7 +92,7 @@ public class Kubectl {
         commands.add("--all-namespaces");
         commands.add("-o");
         commands.add("json");
-//        System.out.println(String.join(" ", commands));
+        System.out.println(String.join(" ", commands));
         ProcessBuilder pb = new ProcessBuilder(commands);
         Process proc = pb.start();
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));

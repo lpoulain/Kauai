@@ -16,6 +16,10 @@ public class KObject {
         return values;
     }
 
+    public String geNamespace() {
+        return values[1];
+    }
+
     public boolean matches(String filter) {
         return values[0].toLowerCase().contains(filter.toLowerCase());
     }
