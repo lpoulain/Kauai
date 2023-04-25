@@ -72,7 +72,10 @@ public class Kubectl {
             } else if (pathStep.equals("[keys]")) {
                 return String.join(", ", obj.keySet());
             } else {
-                if (obj.get(pathStep) == null) return "";
+                if (obj.get(pathStep) == null) {
+                    System.out.printf("Warning: cannot find field %s\n", pathStep);
+                    return "";
+                }
                 return obj.get(pathStep).toString();
             }
         }
